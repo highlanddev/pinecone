@@ -1,0 +1,31 @@
+{
+  "name": "highlanddev/pinecone",
+  "description": "Pinecone plugin by Highland",
+  "type": "craft-plugin",
+  "keywords": [],
+  "license": "Craft",
+  "authors": [
+	{
+	  "name": "Highland",
+	  "homepage": "https://www.madebyhighland.com"
+	}
+  ],
+  "support": {
+	"email": "help@highland.tools",
+	"issues": "https://github.com/highlanddev/pinecone/issues?state=open",
+	"source": "https://github.com/highlanddev/pinecone",
+	"docs": "https://github.com/highlanddev/pinecone/blob/master/README.md"
+  },
+  "require": {
+	"craftcms/cms": "^4.0.0"
+  },
+  "autoload": {
+	"psr-4": {
+	  "pinecone\\": "src/"
+	}
+  },
+  "extra": {
+	"name": "Pinecone",
+	"handle": "pinecone"
+  }
+}

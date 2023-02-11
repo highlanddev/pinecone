@@ -4,6 +4,7 @@
   "type": "craft-plugin",
   "keywords": [],
   "license": "Craft",
+  "version": "3.0",
   "authors": [
 	{
 	  "name": "Highland",

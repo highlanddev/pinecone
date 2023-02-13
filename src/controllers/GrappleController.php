@@ -20,7 +20,7 @@ class GrappleController extends Controller
 	// =========================================================================
 	
 	
-	protected $allowAnonymous = ['index', 'get-plugins'];
+	protected array|bool|int $allowAnonymous = ['index', 'get-plugins'];
 	
 	public $enableCsrfValidation = false;
 	

@@ -170,89 +170,100 @@ class GrappleController extends Controller
 				$htmlBody = isset($payload->HtmlBody) ? $payload->HtmlBody : '';
 				$attachments = isset($payload->Attachments) ? $payload->Attachments : '';
 				
-				// Check if related ticket. Tickets are related by having the email address they use 
-				// include the first message Message ID, eg: help+iujnds98fsdn89sdf@highland.tools
-				$relatedTicket = \craft\elements\Entry::find()
-				->sectionId(6)
-				->ticketId($to)
-				->one();
 				
-				if (!$relatedTicket) {
-					$newTicket = new Entry([
-						'sectionId' => 6,
-						'typeId' => 6
-					]);
-					$newTicket->setFieldValues([
-						// Ticket ID is also the unique email address for this ticket
-						'ticketId' => explode("@",$to)[0].'+'.$messageId.'@highland.tools'
-					]);
-					$newTicket->title = $subject;
+				// Check if this to the help ticket address
+				if (str_contains($to,'help') {
 					
-					// Notify support
-					Craft::$app
-						->getMailer()
-						->compose()
-						->setTo('sid@madebyhighland.com')
-						->setFrom([$newTicket->ticketId => 'Highland Support'])
-						->setSubject('New support ticket')
-						->setHtmlBody('New ticket on highland.tools!')
-						->send();
+					// Check if related ticket. Tickets are related by having the email address they use 
+					// include the first message Message ID, eg: help+iujnds98fsdn89sdf@highland.tools
+					$relatedTicket = \craft\elements\Entry::find()
+					->sectionId(6)
+					->ticketId($to)
+					->one();
+					
+					if (!$relatedTicket) {
+						$newTicket = new Entry([
+							'sectionId' => 6,
+							'typeId' => 6
+						]);
+						$newTicket->setFieldValues([
+							// Ticket ID is also the unique email address for this ticket
+							'ticketId' => explode("@",$to)[0].'+'.$messageId.'@highland.tools'
+						]);
+						$newTicket->title = $subject;
 						
-					// Autoreply to user
-					Craft::$app
-						->getMailer()
-						->compose()
-						->setTo($from)
-						->setFrom([$newTicket->ticketId => 'Highland Support'])
-						->setSubject('Re: '.$subject)
-						->setHtmlBody('We\'ll be in touch as soon as possible. Replying to this email will update this support ticket. Thanks!')
-						->send();
-					
-				} else {
-					$newTicket = $relatedTicket;
-					
-					
-					
-				}
-				$sortOrder = (clone $newTicket->messages)->anyStatus()->ids();
-				$sortOrder[] = 'new:1';
-				// $explodedDate = explode(" ",$date);
-				// $dateString=$explodedDate[2].' '.$explodedDate[1].', '.$explodedDate[3];//.' '.$explodedDate[4];
-				$receivedDate = Craft::$app->getFormatter()->asDatetime($date, 'r');
-					//Craft::$app->getFormatter()->asDatetime(DateTimeHelper::toIso8601($date),'Y-m-dTH:i');
-					
-				$newBlock = [
-					'type' => 'message',
-					'fields' => [
-						'from' => $from,
-						'fromName' => $fromName,
-						'subject' => $subject,
-						'htmlBody' => $htmlBody,
-						'strippedTextReply' => $strippedTextReply,
-						'dateReceived' => [
-							'datetime' => date('Y-m-d H:i:s'),
-							'timezone' => 'America/Detroit'
+						// Notify support
+						Craft::$app
+							->getMailer()
+							->compose()
+							->setTo('sid@madebyhighland.com')
+							->setFrom([$newTicket->ticketId => 'Highland Support'])
+							->setSubject('New support ticket')
+							->setHtmlBody('New ticket on highland.tools!')
+							->send();
+							
+						// Autoreply to user
+						Craft::$app
+							->getMailer()
+							->compose()
+							->setTo($from)
+							->setFrom([$newTicket->ticketId => 'Highland Support'])
+							->setSubject('Re: '.$subject)
+							->setHtmlBody('We\'ll be in touch as soon as possible. Replying to this email will update this support ticket. Thanks!')
+							->send();
+						
+					} else {
+						$newTicket = $relatedTicket;
+						
+						
+						
+					}
+					$sortOrder = (clone $newTicket->messages)->anyStatus()->ids();
+					$sortOrder[] = 'new:1';
+					// $explodedDate = explode(" ",$date);
+					// $dateString=$explodedDate[2].' '.$explodedDate[1].', '.$explodedDate[3];//.' '.$explodedDate[4];
+					$receivedDate = Craft::$app->getFormatter()->asDatetime($date, 'r');
+						//Craft::$app->getFormatter()->asDatetime(DateTimeHelper::toIso8601($date),'Y-m-dTH:i');
+						
+					$newBlock = [
+						'type' => 'message',
+						'fields' => [
+							'from' => $from,
+							'fromName' => $fromName,
+							'subject' => $subject,
+							'htmlBody' => $htmlBody,
+							'strippedTextReply' => $strippedTextReply,
+							'dateReceived' => [
+								'datetime' => date('Y-m-d H:i:s'),
+								'timezone' => 'America/Detroit'
+							],
+							'sender' => 'client'
 						],
-						'sender' => 'client'
-					],
-				];
-				$newTicket->setFieldValue('messages', [
-					'sortOrder' => $sortOrder,
-					'blocks' => [
-						'new:1' => $newBlock,
-					],
-				]);
-				
-				$newTicket->setFieldValues([
-					'ticketStatus' => 'open'
-				]);
-				
-				$savedTicket = Craft::$app->elements->saveElement($newTicket);
-					
-					
-				return $this->asJson([
-					'success' => True
+					];
+					$newTicket->setFieldValue('messages', [
+						'sortOrder' => $sortOrder,
+						'blocks' => [
+							'new:1' => $newBlock,
+						],
 					]);
+					
+					$newTicket->setFieldValues([
+						'ticketStatus' => 'open'
+					]);
+					
+					$savedTicket = Craft::$app->elements->saveElement($newTicket);
+						
+						
+					return $this->asJson([
+						'success' => True
+						]);
+				} 
+				// If to does not contain the help string
+				else {
+					$file = Craft::getAlias('@storage/logs/pinecone.log');
+					$log = date('Y-m-d H:i:s')." Non help email message received... \n";
+					\craft\helpers\FileHelper::writeToFile($file, $log, ['append' => true]);
+					
 			}
 			
 

@@ -34,38 +34,7 @@ class Plugin extends \craft\base\Plugin
 
 		parent::init();
 			
-		Event::on(
-			Entry::class, 
-			Element::EVENT_AFTER_SAVE, 
-			function(ModelEvent $e) {
-				/* @var Entry $entry */
-				$entry = $e->sender;
 		
-				if (ElementHelper::isDraftOrRevision($entry)) {
-					// don’t do anything with drafts or revisions
-					return;
-				} 
-				
-				if ($entry->section->handle === 'tasks') {
-					$file = Craft::getAlias('@storage/logs/pinecone.log');
-					$log = date('Y-m-d H:i:s').' '.$entry->title." saved. \n";
-					\craft\helpers\FileHelper::writeToFile($file, $log, ['append' => true]);
-					
-					// If this is a repeating task then duplicate it with a reference
-					if ($entry->repeatInterval != 'none' && $entry->repeatInterval != null && $entry->taskStatus == 'complete' ) {
-						$duplicateExists = \craft\elements\Entry::find()->repeatOf($entry->slug)->count();
-							if (!$duplicateExists > 0) {
-								$entry->taskStatus = 'open';
-								$entry->repeatOf = $entry->slug;
-								$entry->dueDate = $entry->dueDate->modify('+'.$entry->repeat.' '.$entry->repeatInterval);
-								$clonedEntry = Craft::$app->getElements()->duplicateElement($entry);		
-							}
-						
-					}
-				}
-				
-			}
-		);
 		
 		// Register control panel section
 	Event::on(

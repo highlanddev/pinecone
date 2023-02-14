@@ -42,12 +42,19 @@ class GrappleController extends Controller
 		// $stuck = $queue->getTotalJobs();
 		$plugins = Craft::$app->plugins->getAllPluginInfo();
 		$updates = Craft::$app->updates->getUpdates(true);
+		$craft = [
+			'edition' => Craft::$app->getEditionName(),
+			'licensedEdition' => Craft::$app->getLicensedEditionName(),
+			'info' => $this->_cleanInfo(),
+			'devMode' => Craft::$app->config->general->devMode
+		];
 		
 		return $this->asJson([
 			'siteUrl' =>getenv('PRIMARY_SITE_URL'),
 			'failedJobs' => $failed,
 			'pluginData' => $plugins,
-			'updates' => $updates
+			'updates' => $updates,
+			'craft' => $craft
 		]);
 	}
 

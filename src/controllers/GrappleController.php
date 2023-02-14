@@ -45,7 +45,7 @@ class GrappleController extends Controller
 		$craft = [
 			'edition' => Craft::$app->getEditionName(),
 			'licensedEdition' => Craft::$app->getLicensedEditionName(),
-			'info' => $this->_cleanInfo(),
+			'info' => Craft::$app->getInfo(),
 			'devMode' => Craft::$app->config->general->devMode
 		];
 		

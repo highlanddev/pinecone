@@ -3,7 +3,7 @@
   "description": "Pinecone plugin by Highland",
   "type": "craft-plugin",
   "keywords": [],
-  "license": "Craft",
+  "license": "proprietary",
   "version": "4.0.0",
   "authors": [
 	{

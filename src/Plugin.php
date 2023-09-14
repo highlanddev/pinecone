@@ -1,4 +1,5 @@
 <?php
+
 namespace pinecone;
 
 use Craft;
@@ -12,62 +13,63 @@ use craft\web\twig\variables\Cp;
 
 
 use pinecone\fields\HighlandText;
+use pinecone\services\addressFromLatLng;
+use pinecone\twig\PineconeExtension;
+use pinecone\twig\PineconeMapExtension;
+
 use craft\services\Fields;
 use craft\events\RegisterComponentTypesEvent;
 
 class Plugin extends \craft\base\Plugin
-{	
-	public function init()
-	{	
-		
-		$this->_registerCustomFieldTypes();
-		
-		// Define a custom alias named after the namespace
-		Craft::setAlias('@pinecone', __DIR__);
+{
+    public function init()
+    {
+        $this->_registerCustomFieldTypes();
 
-		// Set the controllerNamespace based on whether this is a console or web request
-		if (Craft::$app->getRequest()->getIsConsoleRequest()) {
-			$this->controllerNamespace = 'pinecone\\console\\controllers';
-		} else {
-			$this->controllerNamespace = 'pinecone\\controllers';
-		}
+        // Define a custom alias named after the namespace
+        Craft::setAlias('@pinecone', __DIR__);
 
-		parent::init();
-			
-		
-		
-		// Register control panel section
-	Event::on(
-			Cp::class,
-			Cp::EVENT_REGISTER_CP_NAV_ITEMS,
-			function(RegisterCpNavItemsEvent $event) {
-				$event->navItems[] = [
-					'url' => 'pinecone',
-					'label' => 'Pinecone',
-					'icon' => '@pinecone/icon-bw.svg',
-				];
-			}
-		);
-		
-	}
-	
-	// Function to register a field type, called above
-	private function _registerCustomFieldTypes()
-	{
-		Event::on(
-			Fields::class,
-			Fields::EVENT_REGISTER_FIELD_TYPES,
-			function(RegisterComponentTypesEvent $event) {
-				$event->types[] = HighlandText::class;
-			}
-		);
-	}
-	
+        // Set the controllerNamespace based on whether this is a console or web request
+        if (Craft::$app->getRequest()->getIsConsoleRequest()) {
+            $this->controllerNamespace = 'pinecone\\console\\controllers';
+        } else {
+            $this->controllerNamespace = 'pinecone\\controllers';
+        }
 
-	
-	
+        parent::init();
+
+        // Register extensions
+        Craft::$app->view->registerTwigExtension(new PineconeExtension());
+        // Only register this extension if SimpleMap is installed
+        $mapsplugin = Craft::$app->plugins->getPluginInfo('simplemap');
+        if ($mapsplugin['isInstalled']) {
+            Craft::$app->view->registerTwigExtension(new PineconeMapExtension());
+        }
+
+
+        // Register control panel section
+        Event::on(
+            Cp::class,
+            Cp::EVENT_REGISTER_CP_NAV_ITEMS,
+            function (RegisterCpNavItemsEvent $event) {
+                $event->navItems[] = [
+                    'url' => 'pinecone',
+                    'label' => 'Pinecone',
+                    'icon' => '@pinecone/icon-bw.svg',
+                ];
+            }
+        );
+    }
+
+    // Function to register a field type, called above
+    private function _registerCustomFieldTypes()
+    {
+        Event::on(
+            Fields::class,
+            Fields::EVENT_REGISTER_FIELD_TYPES,
+            function (RegisterComponentTypesEvent $event) {
+                $event->types[] = HighlandText::class;
+            }
+        );
+    }
 }
-
-	
-
-

@@ -50,7 +50,7 @@ class PineconeMapExtension extends AbstractExtension
     public function normalizeAddressString(mixed $location, string $country = null): array
     {
         try {
-            $locationLatLng = GeoService::normalizeLocation($location);
+            $locationLatLng = GeoService::normalizeLocation($location,$country);
             return [
             'address' => GeoService::addressFromLatLng($locationLatLng['lat'], $locationLatLng['lng'])
             ];

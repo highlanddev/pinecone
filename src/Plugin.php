@@ -41,10 +41,16 @@ class Plugin extends \craft\base\Plugin
         // Register extensions
         Craft::$app->view->registerTwigExtension(new PineconeExtension());
         // Only register this extension if SimpleMap is installed
-        $mapsplugin = Craft::$app->plugins->getPluginInfo('simplemap');
-        if ($mapsplugin['isInstalled']) {
-            Craft::$app->view->registerTwigExtension(new PineconeMapExtension());
-        }
+        try {
+            $mapsplugin = Craft::$app->plugins->getPlugin('simplemap');
+           if ($mapsplugin && Craft::$app->plugins->getPluginInfo('simplemap')['isInstalled']) {
+               
+               Craft::$app->view->registerTwigExtension(new PineconeMapExtension());
+           }
+        } catch (Exception $e) {
+           echo $e;
+        } 
+        
 
 
         // Register control panel section
